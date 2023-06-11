@@ -10,7 +10,7 @@
 - RSRP: Reference Signal Received Power
   - received power at the mobile device
   - used by the mobile phone to determine best cell tower to use
-- CQI: Channel Quality Indicator^
+- CQI: Channel Quality Indicator
   - value for signal quality
   - influenced by signal strength, noise, intereference levels, etc.
 - model: mobile phone model (again?)
