@@ -1,0 +1,16 @@
+leipzig_bbox:
+  top: 51.44811
+  left: 12.23665
+  bottom: 51.23817
+  right: 12.54254
+
+features: 
+- lon
+- lat
+label: rsrp
+
+model_file: output/model.joblib
+data_file: data/Prob_ml.csv
+
+load_model: true
+normalize_data: true
