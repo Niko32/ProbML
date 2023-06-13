@@ -1,6 +1,18 @@
 ## Probabilistic Machine Learning
 - Topic: Gaussian Process Regression on telecommunication data
 
+## Setting up
+use
+```
+conda env create -p ./.conda -f environment.yml
+```
+to set up environment.
+use 
+```
+conda activate ./.conda
+```
+to activate the environment.
+
 ## Data
 - hw_device: processor
 - hw_model: mobile phone model
