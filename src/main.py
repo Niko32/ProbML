@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # Trim the df for easier computation
     if len(df) > 10_000:
         logging.info("Sampling down to 10k training points for reduced complexity")
-        df = df.sample(4000)
+        df = df.sample(10000)
 
     # Get inputs and outputs for GPR
     X = df[CONFIG["features"]].to_numpy()
