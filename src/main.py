@@ -18,7 +18,6 @@ def plot_results(lat, lon, preds, variances, orig_X, orig_labels):
     ax = plt.figure().add_subplot(projection="3d")
     ax.plot_wireframe(lon, lat, np.reshape(preds, lat.shape), rstride=10, cstride=10, color="orange")
     ax.scatter3D(orig_X.T[0], orig_X.T[1], orig_labels)
-    quantiles = [(norm.ppf(0.9, loc=pred, scale=var) for pred, var in zip(preds, variances)]
     ax.plot_surface(lon, lat, np.reshape(preds + variances, lat.shape), alpha=0.2, color="orange")
     ax.plot_surface(lon, lat, np.reshape(preds - variances, lat.shape), alpha=0.2, color="orange")
     ax.set_zlim(orig_labels.min(), orig_labels.max())
@@ -114,8 +113,7 @@ if __name__ == "__main__":
     TOP, LEFT, BOTTOM, RIGHT = CONFIG["leipzig_bbox"].values()
     lat = np.linspace(BOTTOM, TOP, 100)
     lon = np.linspace(LEFT, RIGHT, 100)
-
-    # Normalization according to training data
+    # Normalize based on training data mean and variance
     if CONFIG["normalize_data"]:
         lon = (lon - X_mean[0]) / X_std[0]
         lat = (lat - X_mean[1]) / X_std[1]
