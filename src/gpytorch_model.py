@@ -21,7 +21,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
     
     def train_loop(self):
-        # Find optimal model hyperparameters
+        # Set the modules to train mode
         self.train()
         self.likelihood.train()
 
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     # Test points are regularly spaced along [0,1]
     # Make predictions by feeding model through likelihood
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
-        test_x = torch.linspace(0, 1, 51)
+        test_x = torch.linspace(0, 1, 50)
         observed_pred = likelihood(model(test_x))
 
     plot_gp(observed_pred, train_x, train_y, test_x)
