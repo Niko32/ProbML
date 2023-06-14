@@ -6,11 +6,25 @@ import numpy as np
 import joblib
 import os
 import logging
+from sys import stdout
 import matplotlib.pyplot as plt
 import matplotlib
+from scipy.stats.distributions import norm
+from preprocessing import prepare_data
+
 matplotlib.use("TkAgg")
 
-from preprocessing import prepare_data
+def read_tristans_file(filepath):
+    """
+    Reads a file with coordinates of a hexagonized leipzig.
+    :param filepath: path to a file with content [(lat, long), ...., (lat, long)] in one line.
+    :return: np array with unique centers of the hexagonized leipzig map.
+    """
+    with open(filepath, "r") as file:
+        # awkward format makes eval the easiest way of opening. This is a security hazard.
+        full_arr = np.array(eval(file.readline()), dtype=float)
+    return np.unique(full_arr, axis=1)
+
 
 
 def plot_results(X_test, preds, variances, orig_X, orig_labels):
