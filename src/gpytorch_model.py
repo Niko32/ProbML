@@ -5,6 +5,8 @@ import torch
 import gpytorch
 from matplotlib import pyplot as plt
 
+from preprocessing import prepare_data
+
 
 # We will use the simplest form of GP model, exact inference
 class ExactGPModel(gpytorch.models.ExactGP):
@@ -65,9 +67,13 @@ def plot_gp(observed_pred, train_x, train_y, test_x):
     plt.show()
 
 if __name__ == "__main__":
-    train_x = torch.linspace(0, 1, 100)
-    # True function is sin(2*pi*x) with Gaussian noise
-    train_y = torch.sin(train_x * (2 * math.pi)) + torch.randn(train_x.size()) * math.sqrt(0.04)
+    # # Gpytorch example data
+    # train_x = torch.linspace(0, 1, 100)
+    # train_y = torch.sin(train_x * (2 * math.pi)) + torch.randn(train_x.size()) * math.sqrt(0.04)
+    # test_x = torch.linspace(0, 1, 50)
+
+    X, y, X_test = prepare_data()
+    train_x, train_y, test_x = torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.float32), torch.tensor(X_test, dtype=torch.float32)
 
     # Init model
     likelihood = gpytorch.likelihoods.GaussianLikelihood()
@@ -75,10 +81,10 @@ if __name__ == "__main__":
 
     model.train_loop()
 
-    # Make predictions
-    test_x = train_x
-    f_preds = model(test_x)
-    y_preds = likelihood(model(test_x))
+    # # Make predictions
+    # test_x = train_x
+    # f_preds = model(test_x)
+    # y_preds = likelihood(model(test_x))
 
     # f_mean = f_preds.mean
     # f_var = f_preds.variance
@@ -92,7 +98,10 @@ if __name__ == "__main__":
     # Test points are regularly spaced along [0,1]
     # Make predictions by feeding model through likelihood
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
-        test_x = torch.linspace(0, 1, 50)
         observed_pred = likelihood(model(test_x))
 
-    plot_gp(observed_pred, train_x, train_y, test_x)
+    plot_gp(observed_pred, train_x[:, 0], train_y, test_x[:, 0])
+
+    # Save and load
+    # torch.save(model.state_dict(), "model.pth")
+    # state_dict = torch.load("model.pth")
