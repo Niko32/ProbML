@@ -14,10 +14,10 @@ from visualisation import plot_results
 
 # We will use the simplest form of GP model, exact inference
 class ExactGPModel(gpytorch.models.ExactGP):
-    def __init__(self, train_x, train_y, likelihood, training_iter = 50):
+    def __init__(self, train_x, train_y, likelihood, kernel, training_iter = 50):
         super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
         self.mean_module = gpytorch.means.ConstantMean()
-        self.covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel())
+        self.covar_module = kernel
         self.likelihood = likelihood
         self.training_iter = training_iter
 
@@ -66,8 +66,9 @@ if __name__ == "__main__":
     test_x = torch.tensor(X_test, dtype=torch.float32)
 
     # Init model
+    kernel = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel())
     likelihood = gpytorch.likelihoods.GaussianLikelihood()
-    model = ExactGPModel(train_x, train_y, likelihood)
+    model = ExactGPModel(train_x, train_y, likelihood, kernel)
 
     # Train model
     model.train_loop()
@@ -76,14 +77,12 @@ if __name__ == "__main__":
     model.eval()
     likelihood.eval()
 
-    # Test points are regularly spaced along [0,1]
     # Make predictions by feeding model through likelihood
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
         observed_pred = likelihood(model(test_x))
         means = observed_pred.mean.numpy()
         variances = observed_pred.variance.numpy()
 
-    # plot_gp(observed_pred, train_x, train_y, test_x)
     plot_results(test_x, means, variances, train_x, train_y)
 
     # Save and load the model
