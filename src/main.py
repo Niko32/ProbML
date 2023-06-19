@@ -10,6 +10,8 @@ from sys import stdout
 import matplotlib.pyplot as plt
 import matplotlib
 from scipy.stats.distributions import norm
+
+from visualisation import plot_results
 from preprocessing import prepare_data
 
 matplotlib.use("TkAgg")
@@ -24,18 +26,6 @@ def read_tristans_file(filepath):
         # awkward format makes eval the easiest way of opening. This is a security hazard.
         full_arr = np.array(eval(file.readline()), dtype=float)
     return np.unique(full_arr, axis=1)
-
-
-
-def plot_results(X_test, preds, variances, orig_X, orig_labels):
-    lon, lat = X_test.T.reshape(2, 100, 100)
-    ax = plt.figure().add_subplot(projection="3d")
-    ax.plot_wireframe(lon, lat, np.reshape(preds, lat.shape), rstride=10, cstride=10, color="orange")
-    ax.scatter3D(orig_X.T[0], orig_X.T[1], orig_labels)
-    ax.plot_surface(lon, lat, np.reshape(preds + variances, lat.shape), alpha=0.2, color="orange")
-    ax.plot_surface(lon, lat, np.reshape(preds - variances, lat.shape), alpha=0.2, color="orange")
-    ax.set_zlim(orig_labels.min(), orig_labels.max())
-    plt.show()
 
 
 if __name__ == "__main__":
