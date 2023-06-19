@@ -1,12 +1,7 @@
 # https://docs.gpytorch.ai/en/stable/examples/01_Exact_GPs/Simple_GP_Regression.html
 
-import math
 import torch
 import gpytorch
-from matplotlib import pyplot as plt
-import numpy as np
-from numpy import ndarray
-from gpytorch.distributions.multivariate_normal import MultivariateNormal 
 
 from preprocessing import prepare_data
 from visualisation import plot_results
@@ -32,7 +27,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
         self.likelihood.train()
 
         # Use the adam optimizer
-        optimizer = torch.optim.Adam(self.parameters(), lr=0.1)  # Includes GaussianLikelihood parameters
+        optimizer = torch.optim.Adam(self.parameters(), lr=1.)  # Includes GaussianLikelihood parameters
 
         # "Loss" for GPs - the marginal log likelihood
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self)
@@ -45,10 +40,11 @@ class ExactGPModel(gpytorch.models.ExactGP):
             # Calc loss and backprop gradients
             loss = -mll(output, train_y)
             loss.backward()
-            print('Iter %d/%d - Loss: %.3f   lengthscale: %.3f   noise: %.3f' % (
+            print('Iter %d/%d - Loss: %.3f   lengthscale: %.3f   noise: %.3f   output scale: %.3f' % (
                 i + 1, self.training_iter, loss.item(),
                 self.covar_module.base_kernel.lengthscale.item(),
-                self.likelihood.noise.item()
+                self.likelihood.noise.item(),
+                self.covar_module.outputscale.item()
             ))
             optimizer.step()
             
@@ -68,7 +64,7 @@ if __name__ == "__main__":
     # Init model
     kernel = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel())
     likelihood = gpytorch.likelihoods.GaussianLikelihood()
-    model = ExactGPModel(train_x, train_y, likelihood, kernel)
+    model = ExactGPModel(train_x, train_y, likelihood, kernel, 100)
 
     # Train model
     model.train_loop()
