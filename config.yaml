@@ -11,6 +11,7 @@ label: rsrp
 
 model_file: output/model.joblib
 data_file: data/Prob_ml.csv
+gpytorch_save_path: output/gpytorch_models
 
 load_model: true
 normalize_data: true

@@ -2,10 +2,17 @@
 
 import torch
 import gpytorch
+import matplotlib
+import yaml
+from os import listdir, remove, mkdir
+from os.path import exists
 
 from preprocessing import prepare_data
 from visualisation import plot_results
-import matplotlib
+
+
+with open("config.yaml", "r") as f:
+    CONFIG = yaml.safe_load(f)
 
 
 # We will use the simplest form of GP model, exact inference
@@ -16,13 +23,16 @@ class ExactGPModel(gpytorch.models.ExactGP):
         self.covar_module = kernel
         self.likelihood = likelihood
         self.training_iter = training_iter
+        self.train_x = train_x
+        self.train_y = train_y
+        # self.test_x = test_x 
 
     def forward(self, x):
         mean_x = self.mean_module(x)
         covar_x = self.covar_module(x)
         return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
 
-    def train_loop(self):
+    def train_loop(self) -> float:
         # Set the modules to train mode
         self.train()
         self.likelihood.train()
@@ -37,11 +47,11 @@ class ExactGPModel(gpytorch.models.ExactGP):
             # Zero gradients from previous iteration
             optimizer.zero_grad()
             # Output from model
-            output = self(train_x)
+            output = self(self.train_x)
             # Calc loss and backprop gradients
-            loss = -mll(output, train_y)
+            loss = - mll(output, self.train_y)
             loss.backward()
-            print('Iter %d/%d - Loss: %.3f   lengthscale: %.3f, alpha: %.3f,   noise: %.3f   output scale: %.3f' % (
+            print('Iter %d/%d - Loss: %.3f  lengthscale: %.3f,  alpha: %.3f,  noise: %.3f  output scale: %.3f' % (
                 i + 1, self.training_iter, loss.item(),
                 self.covar_module.base_kernel.lengthscale.item(),
                 self.covar_module.base_kernel.alpha.item(),
@@ -49,6 +59,24 @@ class ExactGPModel(gpytorch.models.ExactGP):
                 self.covar_module.outputscale.item()
             ))
             optimizer.step()
+
+        return loss.item()
+    
+def save_best_models(model, loss, n_models = 3):
+    """ Looks at the saved models. If the current model is better than one of them, it is saved instead. """
+    SAVE_PATH = CONFIG["gpytorch_save_path"]
+    if not exists(SAVE_PATH):
+        mkdir(SAVE_PATH)
+    saved_models = listdir(SAVE_PATH)
+
+    if len(saved_models) < n_models:
+        torch.save(model.state_dict(), f"{SAVE_PATH}/{loss:.4f}.pth")
+    else:
+        for saved_model in saved_models:
+            if loss < float(saved_model[:-4]):
+                torch.save(model.state_dict(), f"{SAVE_PATH}/{loss:.4f}.pth")
+                remove(f"{SAVE_PATH}/{saved_model}")
+                break
 
 
 if __name__ == "__main__":
@@ -67,10 +95,10 @@ if __name__ == "__main__":
     # Init model
     kernel = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RQKernel(lengthscale=1, lengthscale_constraint=gpytorch.constraints.Interval(0.5, 1), alpha=1, alpha_constraint=gpytorch.constraints.Interval(5, 100)))
     likelihood = gpytorch.likelihoods.GaussianLikelihood()
-    model = ExactGPModel(train_x, train_y, likelihood, kernel, 1000)
+    model = ExactGPModel(train_x, train_y, likelihood, kernel, 100)
 
     # Train model
-    model.train_loop()
+    loss = model.train_loop()
 
     # Get into evaluation (predictive posterior) mode
     model.eval()
@@ -82,8 +110,8 @@ if __name__ == "__main__":
         means = observed_pred.mean.numpy()
         variances = observed_pred.variance.numpy()
 
+    # Save and load the model with the loss as its name
+    save_best_models(model, loss)
+
     plot_results(test_x, means, variances, train_x, train_y)
 
-    # Save and load the model
-    # torch.save(model.state_dict(), "model.pth")
-    # state_dict = torch.load("model.pth")

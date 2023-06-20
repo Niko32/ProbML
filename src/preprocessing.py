@@ -73,6 +73,7 @@ def prepare_data():
         logging.info("Sampling down to 10k training points for reduced complexity")
         df = df.sample(CONFIG["trim_size"])
 
+    # TODO: Split data into train/eval/test
     # Get inputs and outputs for GPR
     X = df[CONFIG["features"]].to_numpy()
     y = df[CONFIG["label"]].to_numpy()
@@ -84,7 +85,6 @@ def prepare_data():
         y = (y - y_mean) / y_std
 
     # Create grid to run GPR on
-    TOP, LEFT, BOTTOM, RIGHT = CONFIG["leipzig_bbox"].values()
     lat = np.linspace(BOTTOM, TOP, 100)
     lon = np.linspace(LEFT, RIGHT, 100)
     # Normalize based on training data mean and variance
