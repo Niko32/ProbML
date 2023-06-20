@@ -14,3 +14,4 @@ data_file: data/Prob_ml.csv
 
 load_model: true
 normalize_data: true
+trim_size: 1000

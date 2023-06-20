@@ -15,6 +15,24 @@ def filter_dataframe_by_bounding_box(df, top, left, bottom, right):
                      (df['lon'] >= left) & (df['lon'] <= right)]
     return filtered_df
 
+def split_data(df: pd.DataFrame, train_fraction = 0.7, eval_fraction = 0.15, test_fraction = 0.15):
+    assert train_fraction + eval_fraction + test_fraction == 1.
+
+    # Shuffle the df
+    df = df.sample(frac=1)
+
+    # Compute the number of rows in each set
+    n_total = len(df)
+    n_train = int(train_fraction * n_total)
+    n_eval = int(eval_fraction * n_total) 
+
+    # Get the rows
+    train_df = df.iloc[:n_train]
+    eval_df = df.iloc[n_train:n_train + n_eval]
+    test_df = df.iloc[n_train + n_eval:]
+
+    return train_df, eval_df, test_df
+
 def prepare_data():
     # Read data
     COLUMNS = {
@@ -53,7 +71,7 @@ def prepare_data():
     # Trim the df for easier computation
     if len(df) > 10_000:
         logging.info("Sampling down to 10k training points for reduced complexity")
-        df = df.sample(100)
+        df = df.sample(CONFIG["trim_size"])
 
     # Get inputs and outputs for GPR
     X = df[CONFIG["features"]].to_numpy()
