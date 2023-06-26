@@ -69,8 +69,8 @@ def prepare_data():
     df = filter_dataframe_by_bounding_box(df, TOP, LEFT, BOTTOM, RIGHT)
 
     # Trim the df for easier computation
-    if len(df) > 10_000:
-        logging.info("Sampling down to 10k training points for reduced complexity")
+    if len(df) > CONFIG["trim_size"]:
+        logging.info(f"Sampling down to {CONFIG['trim_size']} training points for reduced complexity")
         df = df.sample(CONFIG["trim_size"])
 
     # TODO: Split data into train/eval/test
