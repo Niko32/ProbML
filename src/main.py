@@ -39,8 +39,8 @@ if __name__ == "__main__":
     X, y, X_test = prepare_data()
 
     # Init GPR
-    kernel = RBF(length_scale=1, length_scale_bounds="fixed")
-    gpr = GaussianProcessRegressor(kernel=kernel)
+    kernel = RationalQuadratic(length_scale=0.6, length_scale_bounds="fixed", alpha=30, alpha_bounds="fixed")
+    gpr = GaussianProcessRegressor(kernel=kernel, alpha=0.8)
 
     # Load an existing model or train a new one
     if os.path.exists(CONFIG["model_file"]) and CONFIG["load_model"]:
