@@ -12,3 +12,16 @@ Note that geostatisticians often talk about creating "Variograms". What they are
 The kernels typically used seem to be the Exponential Kernel, linear kernel and spherical kernel.
 
 They too simply vary those across problems.
+
+Most kriging methods assume stationarity, aka that the mean of the data does not change across space.
+Universal kriging suggests the addition of a mean model. [@armstrong1984problems] offers an explanation in
+his paper discussing problems with universal kriging.
+
+# Kernels
+I found a comprehensive [page that visualizes various kernels](https://peterroelants.github.io/posts/gaussian-process-kernels/).
+I suggest the Rational quadratic kernel which supposedly captures a mixture of Radial Basis
+Functions and is seemingly quite good at offering a distance-related covariance function
+that captures fine structures (depending on it's parameters.) Honestly, this choice
+is very much made by gut feeling that this kernel would better be able to capture the fine grained influence
+of a tertiary feature such as urban density.
+
