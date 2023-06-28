@@ -41,9 +41,9 @@ def calculate_r_square(actual, predicted):
     return r_square
 
 
-def calculate_likelihood(predictor_means, predictor_stddevs, actual_values):
+def calculate_mean_likelihood(predictor_means, predictor_stddevs, actual_values):
     """
-    Calculates the likelihood of observing the actual values given a predictor that assumes a Gaussian distribution
+    Calculates the mean likelihood of observing the actual values given a predictor that assumes a Gaussian distribution
     at each point and returns separate arrays of means and standard deviations.
 
     Args:
@@ -61,7 +61,7 @@ def calculate_likelihood(predictor_means, predictor_stddevs, actual_values):
     if len(predictor_means) != len(predictor_stddevs) or len(predictor_means) != len(actual_values):
         raise ValueError("Lengths of predictor_means, predictor_stddevs, and actual_values must be the same.")
 
-    likelihood = np.prod(1.0 / (np.sqrt(2 * np.pi) * predictor_stddevs) * np.exp(
+    likelihood = np.mean(1.0 / (np.sqrt(2 * np.pi) * predictor_stddevs) * np.exp(
         -0.5 * ((actual_values - predictor_means) / predictor_stddevs) ** 2))
     return likelihood
 
