@@ -15,4 +15,4 @@ gpytorch_save_path: output/gpytorch_models
 
 load_model: true
 normalize_data: true
-trim_size: 1000
+trim_size: 10000

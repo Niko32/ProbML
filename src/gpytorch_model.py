@@ -41,7 +41,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
 
 
         # Use the adam optimizer
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-1)  # Includes GaussianLikelihood parameters
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-2)  # Includes GaussianLikelihood parameters
 
         # "Loss" for GPs - the marginal log likelihood
         mll = gpytorch.mlls.ExactMarginalLogLikelihood(self.likelihood, self)
