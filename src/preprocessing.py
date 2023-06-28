@@ -2,7 +2,7 @@ import logging
 import yaml
 import numpy as np
 import pandas as pd
-
+from sklearn.model_selection import train_test_split
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -10,12 +10,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 with open("config.yaml", "r") as f:
     CONFIG = yaml.safe_load(f)
 
+
 def filter_dataframe_by_bounding_box(df, top, left, bottom, right):
     filtered_df = df[(df['lat'] >= bottom) & (df['lat'] <= top) &
                      (df['lon'] >= left) & (df['lon'] <= right)]
     return filtered_df
 
-def split_data(df: pd.DataFrame, train_fraction = 0.7, eval_fraction = 0.15, test_fraction = 0.15):
+
+def split_data(df: pd.DataFrame, train_fraction=0.7, eval_fraction=0.15, test_fraction=0.15):
     assert train_fraction + eval_fraction + test_fraction == 1.
 
     # Shuffle the df
@@ -24,7 +26,7 @@ def split_data(df: pd.DataFrame, train_fraction = 0.7, eval_fraction = 0.15, tes
     # Compute the number of rows in each set
     n_total = len(df)
     n_train = int(train_fraction * n_total)
-    n_eval = int(eval_fraction * n_total) 
+    n_eval = int(eval_fraction * n_total)
 
     # Get the rows
     train_df = df.iloc[:n_train]
@@ -33,7 +35,18 @@ def split_data(df: pd.DataFrame, train_fraction = 0.7, eval_fraction = 0.15, tes
 
     return train_df, eval_df, test_df
 
-def prepare_data():
+
+def split_array(dataX, dataY, train_ratio=0.7, test_ratio=0.15, validation_ratio=0.15):
+    # train is now 70% of the entire data set
+    x_train, x_test, y_train, y_test = train_test_split(dataX, dataY, test_size=1 - train_ratio)
+
+    # test is now 15% of the initial data set
+    # validation is now 15% of the initial data set
+    x_val, x_test, y_val, y_test = train_test_split(x_test, y_test, test_size=test_ratio / (test_ratio + validation_ratio))
+    return x_train, y_train, x_test, y_test, x_val, y_val
+
+
+def prepare_data(split=False):
     # Read data
     COLUMNS = {
         "hw_device": str,
@@ -73,7 +86,7 @@ def prepare_data():
         logging.info(f"Sampling down to {CONFIG['trim_size']} training points for reduced complexity")
         df = df.sample(CONFIG["trim_size"])
 
-    # TODO: Split data into train/eval/test
+
     # Get inputs and outputs for GPR
     X = df[CONFIG["features"]].to_numpy()
     y = df[CONFIG["label"]].to_numpy()
@@ -84,6 +97,7 @@ def prepare_data():
         X = (X - X_mean) / X_std
         y = (y - y_mean) / y_std
 
+
     # Create grid to run GPR on
     lat = np.linspace(BOTTOM, TOP, 100)
     lon = np.linspace(LEFT, RIGHT, 100)
@@ -91,6 +105,6 @@ def prepare_data():
     if CONFIG["normalize_data"]:
         lon = (lon - X_mean[0]) / X_std[0]
         lat = (lat - X_mean[1]) / X_std[1]
-    X_test = np.array(np.meshgrid(lon, lat)).reshape((2, -1)).T
-
-    return X, y, X_test
+    X_grid = np.array(np.meshgrid(lon, lat)).reshape((2, -1)).T
+    X_train, y_train, X_test, y_test, X_val, y_val = split_array(X, y)
+    return X_train, y_train, X_test, y_test, X_val, y_val, X_grid

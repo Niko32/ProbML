@@ -36,7 +36,7 @@ if __name__ == "__main__":
         CONFIG = yaml.safe_load(f)
 
     # Get data
-    X, y, X_test = prepare_data()
+    X_train, y_train, X_test, y_test, X_val, y_val, X_grid = prepare_data()
 
     # Init GPR
     kernel = RationalQuadratic(length_scale=0.6, length_scale_bounds="fixed", alpha=30, alpha_bounds="fixed")
@@ -52,8 +52,8 @@ if __name__ == "__main__":
         # the data does not fit into memory entirely
         # TODO: Is this a valid approach for GPR?
         N_BATCHES = 1
-        X_batches = np.array_split(X, N_BATCHES)
-        y_batches = np.array_split(y, N_BATCHES)
+        X_batches = np.array_split(X_train, N_BATCHES)
+        y_batches = np.array_split(y_train, N_BATCHES)
         for i in range(N_BATCHES):
             logging.info(f"Fitting GPR to batch {i + 1} out of {N_BATCHES}")
             gpr.fit(X_batches[i], y_batches[i])
@@ -62,7 +62,7 @@ if __name__ == "__main__":
         joblib.dump(gpr, CONFIG["model_file"])
 
     # Run GPR
-    logging.info(f"predicting at {X_test.shape[0]} points...")
-    predicted_labels, predicted_stds = gpr.predict(X_test, return_std=True)
+    logging.info(f"predicting at {X_grid.shape[0]} points...")
+    predicted_labels, predicted_stds = gpr.predict(X_grid, return_std=True)
     logging.info(f"predicted_labels: {predicted_labels}")
-    plot_results(X_test, predicted_labels, predicted_stds, X, y)
+    plot_results(X_grid, predicted_labels, predicted_stds, X_train, y_train)

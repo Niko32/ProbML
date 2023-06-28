@@ -87,10 +87,10 @@ if __name__ == "__main__":
     # test_x = torch.linspace(0, 1, 50)
 
     # Get data
-    X, y, X_test = prepare_data()
-    train_x = torch.tensor(X, dtype=torch.float32)
-    train_y = torch.tensor(y, dtype=torch.float32)
-    test_x = torch.tensor(X_test, dtype=torch.float32)
+    X_train, y_train, X_test, y_test, X_val, y_val, X_grid = prepare_data()
+    train_x = torch.tensor(X_train, dtype=torch.float32)
+    train_y = torch.tensor(y_train, dtype=torch.float32)
+    test_x = torch.tensor(X_grid, dtype=torch.float32)
 
     # Init model
     kernel = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RQKernel(lengthscale=1, lengthscale_constraint=gpytorch.constraints.Interval(0.5, 1), alpha=1, alpha_constraint=gpytorch.constraints.Interval(5, 100)))
