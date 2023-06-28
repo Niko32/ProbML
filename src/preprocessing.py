@@ -36,13 +36,13 @@ def split_data(df: pd.DataFrame, train_fraction=0.7, eval_fraction=0.15, test_fr
     return train_df, eval_df, test_df
 
 
-def split_array(dataX, dataY, train_ratio=0.7, test_ratio=0.15, validation_ratio=0.15):
+def split_array(dataX, dataY, train_ratio=0.7, test_ratio=0.15, validation_ratio=0.15, random_state=42):
     # train is now 70% of the entire data set
-    x_train, x_test, y_train, y_test = train_test_split(dataX, dataY, test_size=1 - train_ratio)
+    x_train, x_test, y_train, y_test = train_test_split(dataX, dataY, test_size=1 - train_ratio, random_state=random_state)
 
     # test is now 15% of the initial data set
     # validation is now 15% of the initial data set
-    x_val, x_test, y_val, y_test = train_test_split(x_test, y_test, test_size=test_ratio / (test_ratio + validation_ratio))
+    x_val, x_test, y_val, y_test = train_test_split(x_test, y_test, test_size=test_ratio / (test_ratio + validation_ratio), random_state=random_state)
     return x_train, y_train, x_test, y_test, x_val, y_val
 
 
@@ -106,5 +106,5 @@ def prepare_data(split=False):
         lon = (lon - X_mean[0]) / X_std[0]
         lat = (lat - X_mean[1]) / X_std[1]
     X_grid = np.array(np.meshgrid(lon, lat)).reshape((2, -1)).T
-    X_train, y_train, X_test, y_test, X_val, y_val = split_array(X, y)
+    X_train, y_train, X_test, y_test, X_val, y_val = split_array(X, y, random_state=CONFIG["random_state"])
     return X_train, y_train, X_test, y_test, X_val, y_val, X_grid

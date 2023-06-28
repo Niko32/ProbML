@@ -16,3 +16,4 @@ gpytorch_save_path: output/gpytorch_models
 load_model: true
 normalize_data: true
 trim_size: 10000
+random_state: 42

@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
     # Init model
     kernel = gpytorch.kernels.ScaleKernel(
-        gpytorch.kernels.RQKernel(lengthscale=1, lengthscale_constraint=gpytorch.constraints.Interval(0.5, 1), alpha=1,
+        gpytorch.kernels.RQKernel(lengthscale=0.75, lengthscale_constraint=gpytorch.constraints.Interval(0.5, 1), alpha=50,
                                   alpha_constraint=gpytorch.constraints.Interval(5, 100)))
     likelihood = gpytorch.likelihoods.GaussianLikelihood()
     model = ExactGPModel(train_x, train_y, test_x, test_y,likelihood, kernel, 100, early_stopping_patience=5)
