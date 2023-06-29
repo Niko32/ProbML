@@ -71,7 +71,7 @@ class ExactGPModel(gpytorch.models.ExactGP):
                 test_loss = mll(test_preds, self.test_y)
                 test_likelihood = calculate_mean_likelihood(test_preds.mean.numpy(), test_preds.variance.numpy(), self.test_y.numpy())
                 test_mse = calculate_mse(test_preds.mean.numpy(), self.test_y.numpy())
-                test_rsq = calculate_r_square(test_preds.mean.numpy(), self.test_y.numpy())
+                test_rsq = calculate_r_square(test_preds.mean.numpy(), self.test_y.numpy()) #TODO: Something seems wrong here. Result is too bad.
 
                 print("test set results: loss: %.3f likelihood: %.4f perc. mse: %.3f rsquare: %.3f" % (
                     test_loss.item(),
@@ -143,11 +143,21 @@ if __name__ == "__main__":
 
     # Make predictions by feeding model through likelihood
     with torch.no_grad(), gpytorch.settings.fast_pred_var():
-        observed_pred = likelihood(model(grid_x))
-        means = observed_pred.mean.numpy()
-        variances = observed_pred.variance.numpy()
+        observed_pred_grid = likelihood(model(grid_x))
+        grid_means = observed_pred_grid.mean.numpy()
+        grid_variances = observed_pred_grid.variance.numpy()
 
-    # Save and load the model with the loss as its name
+    with torch.no_grad(), gpytorch.settings.fast_pred_var():
+        val_preds = likelihood(model(val_x))
+        val_means = val_preds.mean.numpy()
+        val_variances = val_preds.variance.numpy()
+
+        val_mse = calculate_mse(y_val, val_means)
+        val_rsquare = calculate_r_square(y_val, val_means) # Gives more realistic values here...
+        val_mean_lik = calculate_mean_likelihood(val_means, val_variances, y_val)
+
+    # Save and load the model with the loss as its nammeanse
     save_best_models(model, loss)
 
-    plot_results(grid_x, means, variances, test_x, test_y)
+    print(f"Validation Set: MSE: {val_mse:.4f} RSquare: {val_rsquare:.4f} Mean Likelihood: {val_mean_lik*100:.4f}% ")
+    plot_results(grid_x, grid_means, grid_variances, test_x, test_y)
